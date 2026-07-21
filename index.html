@@ -7,6 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -26,240 +30,291 @@
         }
     </script>
     <style>
-        html { scroll-behavior: smooth; }
-        .latar-utama { background: linear-gradient(160deg, #0F172A 0%, #1E293B 100%); }
+        html { 
+            scroll-behavior: smooth; 
+        }
         .tombol-aksi { transition: all 0.4s ease; }
         .tombol-aksi:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(200,169,81,0.35); }
         .kartu-paket { transition: 0.3s; }
         .kartu-paket:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(35,138,158,0.2); }
-        .muncul { animation: muncul 1s ease-out forwards; opacity: 0; }
-        @keyframes muncul { from {opacity:0; transform:translateY(25px);} to {opacity:1; transform:translateY(0);} }
+        
+        @keyframes gerakLatar { 0%{transform:scale(1.1) translate(-1%,-1%)} 50%{transform:scale(1.15) translate(1%,1%)} 100%{transform:scale(1.1) translate(-1%,1%)} }
+        @keyframes munculNaik { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes muncul { from{opacity:0} to{opacity:1} }
+        @keyframes melayang { 0%{transform:translate(-150px,0) rotate(0deg)} 50%{transform:translate(150px,-40px) rotate(180deg)} 100%{transform:translate(-150px,0) rotate(360deg)} }
     </style>
 </head>
 <body class="font-sans text-gray-700">
 
-<!-- ✅ BAGIAN UTAMA / BERANDA -->
-<section class="latar-utama min-h-screen flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
-    <div class="absolute top-0 left-0 w-full h-full opacity-5">
-        <div class="absolute top-10 left-1/2 -translate-x-1/2 w-64 h-1 bg-emas rounded-full"></div>
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-80 h-1 bg-emas rounded-full"></div>
+<button id="bukaAdmin" onclick="bukaFormLogin()" class="fixed bottom-2 right-2 w-8 h-8 bg-transparent text-transparent z-50 cursor-default">*</button>
+
+<div id="kotakLogin" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-judul font-bold text-center text-utama mb-4">🔐 Masuk Pengelola</h3>
+        <input type="password" id="masukKode" placeholder="Masukkan Kode Akses" class="w-full border rounded-xl px-4 py-3 mb-3">
+        <p id="pesanSalah" class="text-red-500 text-sm text-center mb-3 hidden">Kode akses salah!</p>
+        <div class="flex gap-2">
+            <button onclick="cekKode()" class="flex-1 bg-utama text-white py-2 rounded-xl font-semibold">Masuk</button>
+            <button onclick="tutupFormLogin()" class="flex-1 bg-gray-300 py-2 rounded-xl">Batal</button>
+        </div>
     </div>
+</div>
 
-    <div class="muncul" style="animation-delay:0.2s;">
-        <img src="logo.png" alt="Logo Allia Travel" class="w-56 h-auto mx-auto mb-5 drop-shadow-lg">
+<div id="panelKelola" class="hidden bg-slate-100 py-5 px-4 border-b-4 border-emas">
+    <div class="max-w-2xl mx-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-judul font-bold text-utama">⚙️ Kelola Daftar Paket</h3>
+            <span id="statusSimpan" class="text-sm text-green-600 hidden">✅ Tersimpan di Server</span>
+            <button onclick="keluarDariAdmin()" class="text-sm bg-gray-400 text-white px-3 py-1 rounded-lg">Keluar</button>
+        </div>
+        <div class="bg-white p-5 rounded-xl shadow mb-5 space-y-3">
+            <input type="text" id="inputNama" placeholder="Nama Paket" class="w-full border rounded-lg px-3 py-2">
+            <input type="text" id="inputHarga" placeholder="Harga Paket" class="w-full border rounded-lg px-3 py-2">
+            <textarea id="inputKeterangan" rows="2" placeholder="Keterangan Singkat" class="w-full border rounded-lg px-3 py-2"></textarea>
+            <input type="text" id="inputFoto" placeholder="Link Alamat Foto Paket" class="w-full border rounded-lg px-3 py-2">
+            <div class="flex gap-2">
+                <button onclick="simpanKeServer()" class="bg-utama text-white px-5 py-2 rounded-lg font-semibold">Simpan Paket</button>
+                <button onclick="batalEdit()" id="tombolBatal" class="hidden bg-gray-300 px-5 py-2 rounded-lg">Batal</button>
+            </div>
+        </div>
+        <div id="daftarEdit" class="space-y-2"></div>
     </div>
+</div>
 
-    <div class="muncul" style="animation-delay:0.4s;">
-        <p class="text-emas text-xs md:text-sm uppercase tracking-[0.25em] mb-3">• U M R A H &nbsp; S E S U A I &nbsp; S U N N A H •</p>
-        <h1 class="text-3xl md:text-4xl font-judul text-white font-bold tracking-wide mb-2">ALLIA TOUR & TRAVEL</h1>
-        <p class="text-white text-lg font-semibold mb-1">Bersama Bpk. Luqman Hakim</p>
-        <p class="text-emas text-xs bg-white/10 inline-block px-3 py-1 rounded-full mb-4">SK Kemenag: 21092201454530002</p>
-        <p class="text-emas italic text-lg md:text-xl font-judul mb-10">Allia selalu ingin kembali ❤️</p>
+<section class="relative min-h-screen flex items-center justify-center text-center text-white overflow-hidden">
+    <div class="absolute inset-0 -z-30">
+        <div class="absolute inset-0 bg-gradient-to-b from-gelap/80 via-gelap/60 to-gelap"></div>
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1591604129939-f1efa4d90f76?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center animate-[gerakLatar_25s_ease-in-out_infinite_alternate] scale-110"></div>
     </div>
-
-    <div class="muncul w-full max-w-md" style="animation-delay:0.6s;">
-        <a href="#daftar-paket" class="tombol-aksi block bg-emas text-gelap font-bold py-4 px-8 rounded-full text-lg shadow-lg">
-            📦 LIHAT PILIHAN PAKET
-        </a>
-
-        <div class="mt-8 flex justify-center gap-6 text-white/80 text-sm">
-            <a href="#tentang" class="hover:text-emas transition">Tentang</a>
-            <span>|</span>
-            <a href="#keunggulan" class="hover:text-emas transition">Keunggulan</a>
-            <span>|</span>
-            <a href="#kontak" class="hover:text-emas transition">Hubungi</a>
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div class="absolute w-80 h-80 rounded-full bg-emas/5 blur-3xl animate-[melayang_18s_linear_infinite]"></div>
+        <div class="absolute top-20 right-10 w-64 h-64 rounded-full bg-utama/10 blur-3xl animate-[melayang_22s_linear_infinite_reverse]"></div>
+    </div>
+    <div class="relative z-10 px-6 max-w-2xl mx-auto">
+        <div class="opacity-0 translate-y-10 animate-[munculNaik_1s_ease_forwards]">
+            <img src="logo.png" alt="Logo Allia Travel" class="w-44 md:w-52 h-auto mx-auto mb-6 drop-shadow-2xl">
+        </div>
+        <p class="text-emas text-sm md:text-base uppercase tracking-[0.3em] mb-4 opacity-0 translate-y-10 animate-[munculNaik_1s_ease_0.2s_forwards]">✨ UMROH SESUAI SUNNAH ✨</p>
+        <h1 class="text-3xl md:text-5xl lg:text-6xl font-judul font-bold leading-tight mb-3 opacity-0 translate-y-10 animate-[munculNaik_1s_ease_0.4s_forwards]">ALLIA TOUR & TRAVEL</h1>
+        <p class="text-xl md:text-2xl font-semibold mb-2 opacity-0 translate-y-10 animate-[munculNaik_1s_ease_0.5s_forwards]">Bersama Bpk. Luqman Hakim</p>
+        <p class="text-white/85 text-sm md:text-base mb-2 opacity-0 translate-y-10 animate-[munculNaik_1s_ease_0.6s_forwards]">📜 SK Kemenag: 21092201454530002</p>
+        <p class="text-emas italic text-lg md:text-xl font-judul mb-10 opacity-0 translate-y-10 animate-[munculNaik_1s_ease_0.7s_forwards]">"Allia selalu ingin kembali" ❤️</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center opacity-0 translate-y-10 animate-[munculNaik_1s_ease_0.9s_forwards]">
+            <a href="#daftar-paket" class="tombol-aksi bg-emas text-gelap font-bold py-4 px-8 rounded-full text-lg shadow-xl">📦 Lihat Pilihan Paket</a>
+            <a href="https://wa.me/6281335856500" target="_blank" class="tombol-aksi bg-white/10 backdrop-blur-md border border-white/20 font-semibold py-4 px-8 rounded-full text-lg hover:bg-white/20">💬 Konsultasi Gratis</a>
         </div>
     </div>
 
-    <a href="#tentang" class="absolute bottom-6 text-white/60 animate-bounce">
-        <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-    </a>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0 animate-[muncul_2s_ease_1.2s_forwards]">
+        <a href="#tentang" class="flex flex-col items-center text-white/60 hover:text-emas transition">
+            <span class="text-xs mb-1">Gulir Kebawah</span>
+            <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </a>
+    </div>
 </section>
 
-
-<!-- ✅ TENTANG KAMI -->
 <section id="tentang" class="py-14 px-4 bg-white">
     <div class="max-w-2xl mx-auto text-center">
         <span class="text-emas font-medium uppercase text-sm">Siapa Kami?</span>
         <h2 class="text-2xl md:text-3xl font-judul font-bold text-utama mt-1 mb-5">Agen Resmi Allia Tour & Travel</h2>
-        <p class="text-gray-600 leading-relaxed">
-            ✨ Bismillah, satu langkah menuju Baitullah. Konsultasikan paket umroh impian Anda sekarang juga bersama Allia Tour. Karena perjalanan terbaik dimulai dengan niat yang tulus dan pelayanan yang amanah.
-        </p>
+        <p class="text-gray-600 leading-relaxed">✨ Bismillah, satu langkah menuju Baitullah. Konsultasikan paket umroh impian Anda sekarang juga bersama Allia Tour.</p>
     </div>
 </section>
 
-
-<!-- ✅ KEUNGGULAN -->
 <section id="keunggulan" class="py-14 px-4 bg-slate-50">
     <div class="max-w-2xl mx-auto">
         <div class="text-center mb-8">
             <span class="text-emas font-medium uppercase text-sm">Mengapa Memilih Kami?</span>
             <h2 class="text-2xl md:text-3xl font-judul font-bold text-utama mt-1">Keunggulan Allia Travel</h2>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-utama">
-                <h3 class="font-semibold text-lg text-gelap mb-2">✅ Berizin Resmi</h3>
-                <p class="text-gray-600 text-sm">SK Kemenag No: 21092201454530002</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-emas">
-                <h3 class="font-semibold text-lg text-gelap mb-2">📖 Sesuai Sunnah</h3>
-                <p class="text-gray-600 text-sm">Panduan manasik sesuai tuntunan Nabi ﷺ</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-utama">
-                <h3 class="font-semibold text-lg text-gelap mb-2">🛏️ Fasilitas Terbaik</h3>
-                <p class="text-gray-600 text-sm">Keberangkatan Surabaya Maskapai Garuda Indonesia</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-emas">
-                <h3 class="font-semibold text-lg text-gelap mb-2">🤝 Pelayanan Sepenuh Hati</h3>
-                <p class="text-gray-600 text-sm">Siap mendampingi Anda kapan saja</p>
-            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-utama"><h3 class="font-semibold text-lg text-gelap mb-2">✅ Berizin Resmi</h3><p class="text-gray-600 text-sm">SK Kemenag No: 21092201454530002</p></div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-emas"><h3 class="font-semibold text-lg text-gelap mb-2">📖 Sesuai Sunnah</h3><p class="text-gray-600 text-sm">Panduan manasik sesuai tuntunan Nabi ﷺ</p></div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-utama"><h3 class="font-semibold text-lg text-gelap mb-2">🛫 Maskapai Resmi</h3><p class="text-gray-600 text-sm">Keberangkatan Surabaya & Jakarta • Garuda Indonesia</p></div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-emas"><h3 class="font-semibold text-lg text-gelap mb-2">🤝 Pelayanan Sepenuh Hati</h3><p class="text-gray-600 text-sm">Siap mendampingi Anda kapan saja</p></div>
         </div>
     </div>
 </section>
 
-
-<!-- ✅ DAFTAR PAKET TERBARU -->
 <section id="daftar-paket" class="py-14 px-4 bg-white">
     <div class="max-w-2xl mx-auto">
         <div class="text-center mb-8">
             <span class="text-emas font-medium uppercase text-sm">Umroh Musim 1448 H</span>
-            <h2 class="text-2xl md:text-3xl font-judul font-bold text-utama mt-1">Pilihan Paket Terbaru</h2>
-            <p class="text-gray-500 text-sm mt-1">Keberangkatan Surabaya • Maskapai Garuda Indonesia</p>
+            <h2 class="text-2xl md:text-3xl font-judul font-bold text-utama mt-1">✈️ Keberangkatan Surabaya & Jakarta</h2>
+            <p class="text-gray-500 text-sm mt-1">Maskapai Garuda Indonesia</p>
+        </div>
+        <div id="wadahPaketUtama" class="space-y-5"></div>
+
+        <div id="tombolAtauTampil" class="bg-slate-50 rounded-2xl p-6 text-center border-l-8 border-utama mt-6">
+            <h3 class="text-xl font-bold text-gelap mb-2">📦 Lihat Semua Paket Lengkap</h3>
+            <p class="text-gray-600 text-sm mb-4">Daftar lengkap jadwal & rincian fasilitas semua paket</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="tampilkanSemuaPaket()" class="tombol-aksi bg-utama text-white font-semibold py-3 px-6 rounded-xl">📋 Buka Daftar Lengkap</button>
+                <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20saya%20ingin%20tanya%20paket" target="_blank" class="tombol-aksi bg-emas text-gelap font-semibold py-3 px-6 rounded-xl">💬 Tanya Lebih Lanjut</a>
+            </div>
         </div>
 
-        <div class="space-y-5">
-            <div class="kartu-paket bg-white rounded-2xl shadow-md overflow-hidden border-t-4 border-emas">
-                <div class="p-5">
-                    <h3 class="text-lg font-bold text-gelap">🔥 PAKET LOYALTY MERDEKA</h3>
-                    <p class="text-xl font-bold text-utama mt-2">Rp 24.900.000,- / Orang</p>
-                    <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20Pak%20Luqman,%20saya%20ingin%20tanya%20Paket%20Loyalty%20Merdeka" 
-                       target="_blank"
-                       class="tombol-aksi block mt-4 bg-utama text-white text-center py-3 rounded-xl font-semibold">
-                       Tanya & Pesan
-                    </a>
-                </div>
+        <div id="wadahDaftarLengkap" class="hidden mt-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-judul font-bold text-utama">📋 Semua Daftar Paket Tersedia</h3>
+                <button onclick="sembunyikanSemuaPaket()" class="text-sm bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg">✕ Tutup</button>
             </div>
-
-            <div class="kartu-paket bg-white rounded-2xl shadow-md overflow-hidden border-t-4 border-gray-300">
-                <div class="p-5">
-                    <h3 class="text-lg font-bold text-gelap">✨ Paket Trendi Plus Basic 9 Hari<br>Plus Taif • Start Surabaya Garuda</h3>
-                    <p class="text-xl font-bold text-utama mt-2">Rp 29.500.000,- / Orang</p>
-                    <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20Pak%20Luqman,%20saya%20ingin%20tanya%20Paket%20Basic%209%20Hari" 
-                       target="_blank"
-                       class="tombol-aksi block mt-4 bg-utama text-white text-center py-3 rounded-xl font-semibold">
-                       Tanya & Pesan
-                    </a>
-                </div>
-            </div>
-
-            <div class="kartu-paket bg-white rounded-2xl shadow-md overflow-hidden border-t-4 border-utama">
-                <div class="p-5">
-                    <h3 class="text-lg font-bold text-gelap">✨ UMROH TRENDI PLUS – PLUS TAIF<br>(Landing Madinah)</h3>
-                    <p class="text-xl font-bold text-utama mt-2">Rp 30.500.000,- / Orang</p>
-                    <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20Pak%20Luqman,%20saya%20ingin%20tanya%20Landing%20Madinah" 
-                       target="_blank"
-                       class="tombol-aksi block mt-4 bg-utama text-white text-center py-3 rounded-xl font-semibold">
-                       Tanya & Pesan
-                    </a>
-                </div>
-            </div>
-
-            <div class="kartu-paket bg-white rounded-2xl shadow-md overflow-hidden border-t-4 border-utama">
-                <div class="p-5">
-                    <h3 class="text-lg font-bold text-gelap">✨ UMROH TRENDI PLUS – PROGRAM UMROH DULU<br>Extra Taif + 1 Malam Transit Jeddah</h3>
-                    <p class="text-xl font-bold text-utama mt-2">Rp 30.900.000,- / Orang</p>
-                    <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20Pak%20Luqman,%20saya%20ingin%20tanya%20Extra%20Transit%20Jeddah" 
-                       target="_blank"
-                       class="tombol-aksi block mt-4 bg-utama text-white text-center py-3 rounded-xl font-semibold">
-                       Tanya & Pesan
-                    </a>
-                </div>
-            </div>
-
-            <div class="kartu-paket bg-white rounded-2xl shadow-md overflow-hidden border-t-4 border-utama">
-                <div class="p-5">
-                    <h3 class="text-lg font-bold text-gelap">✨ UMROH TRENDI PLUS – 10 HARI<br>Program Umroh Dulu + Badar & Taif</h3>
-                    <p class="text-xl font-bold text-utama mt-2">Rp 30.900.000,- / Orang</p>
-                    <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20Pak%20Luqman,%20saya%20ingin%20tanya%20Paket%2010%20Hari" 
-                       target="_blank"
-                       class="tombol-aksi block mt-4 bg-utama text-white text-center py-3 rounded-xl font-semibold">
-                       Tanya & Pesan
-                    </a>
-                </div>
-            </div>
-
-            <div class="kartu-paket bg-white rounded-2xl shadow-md overflow-hidden border-t-4 border-utama">
-                <div class="p-5">
-                    <h3 class="text-lg font-bold text-gelap">✨ UMROH TRENDI PLUS – 16 HARI<br>Plus Badar Taif & 2x Jum'atan</h3>
-                    <p class="text-xl font-bold text-utama mt-2">Rp 32.900.000,- / Orang</p>
-                    <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20Pak%20Luqman,%20saya%20ingin%20tanya%20Paket%202x%20Jumatan" 
-                       target="_blank"
-                       class="tombol-aksi block mt-4 bg-utama text-white text-center py-3 rounded-xl font-semibold">
-                       Tanya & Pesan
-                    </a>
-                </div>
-            </div>
-
-            <div class="kartu-paket bg-white rounded-2xl shadow-md overflow-hidden border-t-4 border-emas">
-                <div class="p-5">
-                    <h3 class="text-lg font-bold text-gelap">✨ PAKET TRENDI PLUS SIGNATURE EXTRA BADAR TAIF</h3>
-                    <p class="text-xl font-bold text-utama mt-2">Rp 37.900.000,- / Orang</p>
-                    <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20Pak%20Luqman,%20saya%20ingin%20tanya%20Paket%20Signature" 
-                       target="_blank"
-                       class="tombol-aksi block mt-4 bg-emas text-gelap text-center py-3 rounded-xl font-semibold">
-                       Tanya & Pesan
-                    </a>
-                </div>
-            </div>
+            <div id="isiDaftarLengkap" class="space-y-4"></div>
         </div>
-        <p class="text-xs text-center text-gray-400 mt-6">*Harga sewaktu-waktu dapat berubah • Konsultasi gratis bersama Bpk. Luqman Hakim</p>
+        <p class="text-xs text-center text-gray-400 mt-4">*Harga sewaktu-waktu dapat berubah</p>
     </div>
 </section>
 
-
-<!-- ✅ KONTAK & SOSMED -->
 <section id="kontak" class="py-14 px-4 bg-slate-50">
     <div class="max-w-2xl mx-auto">
         <div class="text-center mb-8">
             <span class="text-emas font-medium uppercase text-sm">Hubungi Langsung</span>
             <h2 class="text-2xl md:text-3xl font-judul font-bold text-utama mt-1">Bpk. Luqman Hakim</h2>
         </div>
-
-        <div class="bg-gradient-to-br from-gelap ke-gelap-terang rounded-2xl p-6 md:p-8 text-white shadow-xl">
+        <div class="bg-gradient-to-br from-gelap to-gelap-terang rounded-2xl p-6 md:p-8 text-white shadow-xl">
             <div class="space-y-3 mb-7">
                 <p class="flex items-center gap-3"><span class="text-emas text-lg">📧</span> luqmanhakimhidayat@gmail.com</p>
-                <p class="flex items-center gap-3"><span class="text-emas text-lg">📞</span> WhatsApp: <strong>0813-3585-6500</strong></p>
+                <p class="flex items-center gap-3"><span class="text-emas text-lg">📱</span> WhatsApp: <strong>0813-3585-6500</strong></p>
                 <p class="flex items-center gap-3"><span class="text-emas text-lg">📍</span> Melayani Seluruh Indonesia (Basis: Nganjuk - Kediri & Sekitarnya)</p>
-                <p class="flex items-center gap-3"><span class="text-emas text-lg">🕗</span> Senin - Sabtu: 08.00 - 21.00 WIB</p>
             </div>
-
-            <div class="border-t border-white/20 pt-5 mt-5">
-                <p class="text-center text-emas font-semibold mb-3">Ikuti Media Sosial:</p>
-                <div class="flex flex-wrap justify-center gap-3 text-sm">
-                    <a href="https://facebook.com/luqman.hakim.58173" target="_blank" class="bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition">📘 Facebook</a>
-                    <a href="https://t.me/luqmanhakimnganjuk" target="_blank" class="bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition">✈️ Telegram</a>
-                    <a href="https://www.tiktok.com/@luqmannganjuk" target="_blank" class="bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition">🎵 TikTok</a>
-                    <a href="https://instagram.com/luqman_promosi" target="_blank" class="bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition">📷 Instagram</a>
-                </div>
-            </div>
-
-            <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20Pak%20Luqman,%20saya%20ingin%20berkonsultasi%20tentang%20Umroh" 
-               target="_blank"
-               class="tombol-aksi block w-full bg-green-500 hover:bg-green-600 text-center py-4 rounded-xl font-bold text-lg transition shadow-lg mt-6">
-                💬 KONSULTASI GRATIS VIA WA
-            </a>
+            <a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20saya%20ingin%20berkonsultasi%20tentang%20Umroh" target="_blank" class="tombol-aksi block w-full bg-green-500 hover:bg-green-600 text-center py-4 rounded-xl font-bold text-lg transition shadow-lg mt-6">💬 KONSULTASI GRATIS VIA WA</a>
         </div>
     </div>
 </section>
 
-
-<!-- ✅ KAKI HALAMAN -->
 <footer class="bg-gelap text-center py-6 px-4">
     <img src="logo.png" alt="Logo" class="w-16 mx-auto mb-2 opacity-90">
     <p class="text-emas text-sm font-medium">© 2026 Allia Tour & Travel • Agen Resmi Luqman Hakim</p>
     <p class="text-white/50 text-xs mt-1">SK Kemenag: 21092201454530002 • Umrah Sesuai Sunnah ❤️</p>
 </footer>
 
+<script>
+// ==================================================
+const KODE_AKSES = 'Elfairuzy';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAFmhNcwP4-dIMNVlQ2Nb5YQe5Fp7H6o8I",
+  authDomain: "alliatravel.firebaseapp.com",
+  projectId: "alliatravel",
+  storageBucket: "alliatravel.firebasestorage.app",
+  messagingSenderId: "1067713312588",
+  appId: "1:1067713312588:web:ec787d854610acacafc1e9",
+  measurementId: "G-F68LLY6SJ4"
+};
+// ==================================================
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const refPaket = db.collection('daftar_paket');
+
+let daftarIsiPaket = [];
+let idEdit = null;
+
+function cekLangsungAdmin(){ if(window.location.search.includes('admin')) setTimeout(bukaFormLogin, 600); }
+
+async function ambilDariServer(){
+    try {
+        const snap = await refPaket.orderBy('waktu', 'desc').get();
+        daftarIsiPaket = [];
+        snap.forEach(doc => { daftarIsiPaket.push({id:doc.id, ...doc.data()}); });
+        tampilkanKeHalaman();
+    } catch(e) { 
+        console.log('Info: Belum ada data paket yang tersimpan'); 
+    }
+}
+
+async function simpanKeServer(){
+    const nama = document.getElementById('inputNama').value.trim();
+    const harga = document.getElementById('inputHarga').value.trim();
+    if(!nama || !harga){ 
+        alert('⚠️ Nama dan Harga Paket wajib diisi!'); 
+        return; 
+    }
+
+    const data = {
+        nama, harga,
+        keterangan: document.getElementById('inputKeterangan').value.trim(),
+        foto: document.getElementById('inputFoto').value.trim(),
+        waktu: new Date()
+    };
+
+    document.getElementById('statusSimpan').classList.add('hidden');
+
+    try {
+        if(idEdit){
+            await refPaket.doc(idEdit).update(data);
+        } else {
+            await refPaket.add(data);
+        }
+        bersihkanIsianForm();
+        idEdit = null;
+        document.getElementById('tombolBatal').classList.add('hidden');
+        document.getElementById('statusSimpan').classList.remove('hidden');
+        await ambilDariServer();
+        setTimeout(()=>document.getElementById('statusSimpan').classList.add('hidden'), 3000);
+    } catch(e) {
+        console.log('Kesalahan:', e.code, e.message);
+        if(e.code === 'permission-denied'){
+            alert('❌ Gagal Simpan! Pastikan sudah buat Firestore Database & pilih Mode Uji Coba ya');
+        }else if(e.code === 'invalid-api-key'){
+            alert('❌ Kode Firebase salah! Cek kembali bagian konfigurasi');
+        }else{
+            alert('❌ Gagal simpan: ' + e.message + '\nCek koneksi internet atau pengaturan Firebase');
+        }
+    }
+}
+
+function tampilkanKeHalaman(){
+    const wadah = document.getElementById('wadahPaketUtama');
+    let isi = '';
+    if(daftarIsiPaket.length===0){
+        isi = `<div class="kartu-paket bg-white rounded-2xl shadow-md overflow-hidden border-t-4 border-emas mb-6"><div class="w-full h-52 md:h-60 bg-gray-100 flex items-center justify-center text-gray-400">Klik tanda bintang * atau buka ?admin untuk menambah paket</div><div class="p-6 text-center"><h3 class="text-xl font-bold text-gelap">🔥 Contoh Paket Pilihan</h3><p class="text-2xl font-bold text-utama mt-2">Mulai Dari Rp 24.900.000,- / Orang</p></div></div>`;
+    }else{
+        daftarIsiPaket.slice(0,2).forEach(p => isi += buatKartu(p));
+        if(daftarIsiPaket.length>2) isi += `<p class="text-center text-gray-400 text-sm">...dan ${daftarIsiPaket.length-2} paket lainnya</p>`;
+    }
+    wadah.innerHTML = isi;
+    isiDaftarLengkapSemua(); 
+    tampilDaftarUbah();
+}
+
+function buatKartu(p){
+    return `<div class="kartu-paket bg-white rounded-2xl shadow-md overflow-hidden border-t-4 border-emas mb-6"><div class="w-full h-52 md:h-60 overflow-hidden">${p.foto?`<img src="${p.foto}" class="w-full h-full object-cover">`:`<div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">Foto Paket</div>`}</div><div class="p-6 text-center"><h3 class="text-xl font-bold text-gelap">${p.nama}</h3><p class="text-2xl font-bold text-utama mt-2">${p.harga}</p><p class="text-gray-500 text-sm mt-2">${p.keterangan||''}</p><a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20saya%20tanya%20${encodeURIComponent(p.nama)}" target="_blank" class="tombol-aksi block mt-4 bg-utama text-white py-3 rounded-xl font-semibold">Tanya & Pesan</a></div></div>`;
+}
+
+function isiDaftarLengkapSemua(){
+    const wadah = document.getElementById('isiDaftarLengkap');
+    let isi = '';
+    if(daftarIsiPaket.length===0){ isi = `<p class="text-center text-gray-400 py-4">Belum ada paket yang ditambahkan</p>`; }
+    else{ daftarIsiPaket.forEach(p => { isi += `<div class="border rounded-xl p-4 bg-white"><div class="flex flex-col sm:flex-row gap-4 items-center"><div class="w-full sm:w-1/3 h-40 rounded-lg overflow-hidden">${p.foto?`<img src="${p.foto}" class="w-full h-full object-cover">`:`<div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">Foto</div>`}</div><div class="flex-1 text-center sm:text-left"><h4 class="font-bold text-lg text-gelap">${p.nama}</h4><p class="text-utama font-semibold">${p.harga}</p><p class="text-sm text-gray-500 mt-1">${p.keterangan||''}</p></div><a href="https://wa.me/6281335856500?text=Assalamu'alaikum%20saya%20tanya%20${encodeURIComponent(p.nama)}" target="_blank" class="tombol-aksi bg-utama text-white px-4 py-2 rounded-lg text-sm">Pesan</a></div></div>`; }); }
+    wadah.innerHTML = isi;
+}
+
+function tampilkanSemuaPaket(){ 
+    document.getElementById('wadahDaftarLengkap').classList.remove('hidden'); 
+    document.getElementById('tombolAtauTampil').classList.add('hidden');
+    document.getElementById('wadahDaftarLengkap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function sembunyikanSemuaPaket(){ 
+    document.getElementById('wadahDaftarLengkap').classList.add('hidden'); 
+    document.getElementById('tombolAtauTampil').classList.remove('hidden');
+}
+
+function bukaFormLogin(){ document.getElementById('kotakLogin').classList.remove('hidden'); }
+function tutupFormLogin(){ document.getElementById('kotakLogin').classList.add('hidden'); document.getElementById('masukKode').value=''; document.getElementById('pesanSalah').classList.add('hidden'); }
+function cekKode(){ if(document.getElementById('masukKode').value.trim()===KODE_AKSES){ tutupFormLogin(); document.getElementById('panelKelola').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }else{ document.getElementById('pesanSalah').classList.remove('hidden'); } }
+function keluarDariAdmin(){ document.getElementById('panelKelola').classList.add('hidden'); idEdit=null; bersihkanIsianForm(); }
+
+function tampilDaftarUbah(){ const wadah=document.getElementById('daftarEdit'); wadah.innerHTML=''; daftarIsiPaket.forEach((p,i)=>{ wadah.innerHTML += `<div class="bg-white border rounded-lg p-3 flex justify-between items-center"><div><p class="font-semibold">${p.nama}</p><p class="text-sm text-utama">${p.harga}</p></div><div class="flex gap-1"><button onclick="pilihUbah('${p.id}')" class="bg-yellow-400 px-2 py-1 rounded text-xs">Ubah</button><button onclick="hapusSatu('${p.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Hapus</button></div></div>`; }); }
+function pilihUbah(id){ const p = daftarIsiPaket.find(x=>x.id===id); document.getElementById('inputNama').value=p.nama; document.getElementById('inputHarga').value=p.harga; document.getElementById('inputKeterangan').value=p.keterangan||''; document.getElementById('inputFoto').value=p.foto||''; idEdit=id; document.getElementById('tombolBatal').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
+async function hapusSatu(id){ if(confirm('Yakin mau hapus paket ini?')){ await refPaket.doc(id).delete(); await ambilDariServer(); } }
+function batalEdit(){ idEdit=null; bersihkanIsianForm(); document.getElementById('tombolBatal').classList.add('hidden'); }
+function bersihkanIsianForm(){ document.getElementById('inputNama').value=''; document.getElementById('inputHarga').value=''; document.getElementById('inputKeterangan').value=''; document.getElementById('inputFoto').value=''; }
+
+ambilDariServer();
+cekLangsungAdmin();
+</script>
 </body>
 </html>
