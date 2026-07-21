@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allia Tour & Travel - Umroh Sesuai Sunnah</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        utama: '#0F4C5C', sekunder: '#165D71', emas: '#DAA520', 'emas-tua': '#B8860B',
+                        gelap: '#0A1619', 'abu-terang': '#F8FAFC', 'abu-teks': '#64748B'
+                    },
+                    fontFamily: { judul: ['Playfair Display', 'serif'], isi: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="fixed w-full top-0 left-0 z-50 bg-white/95 shadow-sm backdrop-blur-md border-b border-gray-100">
+    <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
+        <div class="font-judul font-bold text-xl md:text-2xl text-gelap tracking-wide">ALLIA TOUR</div>
+        <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+            <a href="#" onclick="bukaHal('beranda'); return false;" class="hover:text-utama transition-colors">Beranda</a>
+            <a href="#" onclick="bukaHal('jadwal'); return false;" class="text-utama font-semibold border-b-2 border-emas pb-1">Lihat Semua</a>
+            <a href="#" onclick="bukaHal('keunggulan'); return false;" class="hover:text-utama transition-colors">Keunggulan</a>
+            <a href="#" onclick="bukaHal('galeri'); return false;" class="hover:text-utama transition-colors">Galeri</a>
+            <button onclick="bukaHal('daftar')" class="tombol-emas text-gelap px-6 py-2.5 text-sm">Pesan Sekarang</button>
+            <button onclick="bukaHal('login')" class="border border-utama text-utama px-4 py-2 text-sm rounded-lg hover:bg-utama hover:text-white transition-colors">Admin</button>
+        </div>
+        <button onclick="bukaTutupMenu()" class="md:hidden text-2xl bg-transparent border-none cursor-pointer text-gelap">☰</button>
+    </div>
+    <div id="menuHp" class="hidden md:hidden absolute w-full bg-white shadow-lg z-50 border-t border-gray-100">
+        <div class="flex flex-col p-5 gap-4 text-sm">
+            <a href="#" onclick="bukaHal('beranda'); bukaTutupMenu(); return false;" class="py-2 px-2">Beranda</a>
+            <a href="#" onclick="bukaHal('jadwal'); bukaTutupMenu(); return false;" class="py-2 px-2 font-semibold text-utama">Lihat Semua</a>
+            <a href="#" onclick="bukaHal('keunggulan'); bukaTutupMenu(); return false;" class="py-2 px-2">Keunggulan</a>
+            <a href="#" onclick="bukaHal('galeri'); bukaTutupMenu(); return false;" class="py-2 px-2">Galeri</a>
+            <button onclick="bukaHal('daftar'); bukaTutupMenu();" class="tombol-emas text-gelap py-2.5 rounded-lg mt-1">Pesan Sekarang</button>
+            <button onclick="bukaHal('login'); bukaTutupMenu();" class="border border-utama text-utama py-2.5 rounded-lg">Masuk Admin</button>
+        </div>
+    </div>
+</nav>
+
+<div id="beranda" class="halaman aktif gradasi-utama flex items-center justify-center text-white relative">
+    <div class="relative z-10 text-center px-5 max-w-2xl animasi-naik">
+        <p class="text-emas text-sm tracking-[0.25em] mb-4 font-medium">✨ PENYELENGGARA RESMI UMROH ✨</p>
+        <h1 class="font-judul text-3xl md:text-[42px] font-bold bayang-teks mb-4 leading-tight">ALLIA TOUR & TRAVEL</h1>
+        <p class="text-lg md:text-xl font-medium mb-2.5">Bapak Luqman Hakim</p>
+        <p class="text-sm text-white/80 mb-6">SK Kemenag: 21092201454530002</p>
+        <p class="italic text-yellow-200 text-xl mb-8 font-medium">"Allia Selalu Ingin Kembali"</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-3.5">
+            <button onclick="bukaHal('jadwal')" class="tombol-emas px-8 py-3.5 font-semibold text-gelap">Lihat Semua Paket</button>
+            <a href="https://wa.me/6281335856500" target="_blank" rel="noopener noreferrer" class="bg-white/10 border border-white/30 px-8 py-3.5 rounded-full font-medium hover:bg-white/18 transition-all">Hubungi Kami</a>
+        </div>
+    </div>
+</div>
+
+<div id="jadwal" class="halaman bg-abu-terang">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-12">
+            <p class="text-utama uppercase text-xs tracking-[0.28em] font-semibold mb-2">PILIHAN PERJALANAN</p>
+            <h2 class="font-judul text-2xl md:text-3xl font-bold text-gelap mb-3">LIHAT SEMUA</h2>
+            <div class="w-20 h-0.5 bg-emas mx-auto rounded-full mb-4"></div>
+        </div>
+        <div id="wadahPaket" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="col-span-full text-center text-gray-400 py-10">Paket akan muncul setelah Bapak tambahkan lewat Panel Admin</p>
+        </div>
+    </div>
+</div>
+
+<div id="keunggulan" class="halaman bg-white">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-12">
+            <p class="text-utama uppercase text-xs tracking-[0.28em] font-semibold mb-2">MENGAPA MEMILIH KAMI</p>
+            <h2 class="font-judul text-2xl md:text-3xl font-bold text-gelap mb-3">KEUNGGULAN PERJALANAN UMROH</h2>
+            <div class="w-20 h-0.5 bg-emas mx-auto rounded-full"></div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="kotak-unggul"><div class="text-2xl mb-3">✅</div><h4 class="font-semibold text-lg text-gelap mb-2">Kepastian Jadwal Berangkat</h4><p class="text-sm text-abu-teks leading-relaxed">Seat pesawat dan reservasi hotel dipastikan terkunci aman sebelum dipasarkan.</p></div>
+            <div class="kotak-unggul"><div class="text-2xl mb-3">📱</div><h4 class="font-semibold text-lg text-gelap mb-2">Pelacakan Berkas Mandiri</h4><p class="text-sm text-abu-teks leading-relaxed">Pantau secara transparan pengurusan paspor, visa, koper, dan status keuangan.</p></div>
+            <div class="kotak-unggul"><div class="text-2xl mb-3">🕋</div><h4 class="font-semibold text-lg text-gelap mb-2">Umroh Sesuai Sunnah</h4><p class="text-sm text-abu-teks leading-relaxed">Pembimbing ibadah berpengalaman, materi disampaikan dengan benar sesuai tuntunan Rasulullah SAW.</p></div>
+            <div class="kotak-unggul"><div class="text-2xl mb-3">🛡️</div><h4 class="font-semibold text-lg text-gelap mb-2">Terdaftar Resmi Kemenag</h4><p class="text-sm text-abu-teks leading-relaxed">Izin penyelenggaraan sah dan terdaftar resmi di Kementerian Agama Republik Indonesia.</p></div>
+        </div>
+    </div>
+</div>
+
+<div id="galeri" class="halaman bg-abu-terang">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-10">
+            <p class="text-utama uppercase text-xs tracking-[0.28em] font-semibold mb-2">DOKUMENTASI KENANGAN</p>
+            <h2 class="font-judul text-2xl md:text-3xl font-bold text-gelap mb-3">GALERI PERJALANAN UMROH</h2>
+            <div class="w-20 h-0.5 bg-emas mx-auto rounded-full mb-5"></div>
+            <div class="tab-galeri justify-center"><button class="btn-tab-g aktif" onclick="gantiTabGaleri('semua')">Semua</button><button class="btn-tab-g" onclick="gantiTabGaleri('foto')">Foto</button><button class="btn-tab-g" onclick="gantiTabGaleri('video')">Video</button></div>
+        </div>
+        <div id="wadahGaleri" class="grid sm:grid-cols-2 md:grid-cols-3 gap-5"><p class="col-span-full text-center text-gray-400 py-10">Foto galeri akan muncul setelah Bapak tambahkan lewat Panel Admin</p></div>
+    </div>
+</div>
+
+<div id="daftar" class="halaman">
+    <div class="max-w-md mx-auto">
+        <div class="bg-white rounded-2xl shadow-mewah p-6 md:p-8 border-t-4 border-emas">
+            <h2 class="font-judul text-xl md:text-2xl font-bold text-center text-gelap mb-1">FORMULIR PENDAFTARAN UMROH</h2>
+            <p class="text-center text-abu-teks text-sm mb-6">Isi data diri dengan lengkap dan benar</p>
+            <select id="pilPaket" class="mb-4"><option value="">-- Pilih Paket yang Diinginkan --</option></select>
+            <input type="text" id="nm" placeholder="Nama Lengkap Sesuai Paspor / KTP" class="mb-3">
+            <input type="text" id="nik" placeholder="NIK / Nomor KTP" class="mb-3">
+            <input type="text" id="hp" placeholder="Nomor WhatsApp Aktif" class="mb-3">
+            <textarea id="alamat" rows="2" placeholder="Alamat Lengkap Tempat Tinggal" class="mb-5"></textarea>
+            <button onclick="kirimDaftar()" class="w-full tombol-emas text-gelap py-3 font-semibold text-base">Kirim Pendaftaran</button>
+        </div>
+    </div>
+</div>
+
+<div id="login" class="halaman">
+    <div class="max-w-sm mx-auto">
+        <div class="bg-white rounded-2xl shadow-mewah p-6 md:p-8 border-t-4 border-utama">
+            <h2 class="font-judul text-xl font-bold text-center text-gelap mb-1">MASUK PENGELOLA</h2>
+            <p class="text-center text-abu-teks text-sm mb-5">Khusus Administrator Allia Tour</p>
+            <input type="text" id="emailAdm" placeholder="Masukkan Email Anda" class="mb-3" autocomplete="off">
+            <input type="password" id="passAdm" placeholder="Masukkan Kata Sandi" class="mb-5" autocomplete="off">
+            <button onclick="masukAdmin()" class="w-full tombol-pesan py-3 rounded-lg">Masuk ke Panel</button>
+        </div>
+    </div>
+</div>
+
+<div id="admin" class="halaman">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <div><h2 class="font-judul text-xl font-bold text-gelap">PANEL PENGELOLA UTAMA</h2><p class="text-xs text-abu-teks">Kendali Penuh Semua Data & Konten Website</p></div>
+            <button onclick="bukaHal('beranda')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-medium">Keluar</button>
+        </div>
+        <div class="tab-pilihan">
+            <button class="btn-tab aktif" onclick="gantiTab('paket')" id="tPaket">Paket Umroh</button>
+            <button class="btn-tab" onclick="gantiTab('daftar')" id="tDaftar">Data Pendaftar</button>
+            <button class="btn-tab" onclick="gantiTab('galeri')" id="tGaleri">Galeri Foto</button>
+        </div>
+        <div id="kPaket" class="bg-white rounded-xl p-5 shadow-kartu">
+            <h3 class="font-semibold mb-3 text-sm">Tambah / Ubah Paket Baru</h3>
+            <div class="space-y-2.5 mb-5">
+                <input type="text" id="iNama" placeholder="Nama Paket * Contoh: Trendi Plus">
+                <input type="text" id="iTgl" placeholder="Tanggal Berangkat & Program">
+                <input type="text" id="iRinci" placeholder="Rincian Singkat">
+                <input type="text" id="iHarga" placeholder="Harga * Contoh: Rp 29.900.000">
+                <div class="grid grid-cols-2 gap-2.5"><input type="number" id="iSisa" placeholder="Sisa Kursi" min="0" value="0"><input type="number" id="iTotal" placeholder="Total Kursi" min="1" value="1"></div>
+                <input type="text" id="iFoto" placeholder="Link Gambar Utama">
+            </div>
+            <div class="flex gap-2.5"><button onclick="simpanPaket()" class="tombol-emas text-gelap px-5 py-2.5 text-sm">💾 Simpan Paket</button><button onclick="bersihkanInputan()" id="btBatal" class="hidden bg-gray-200 px-5 py-2.5 rounded-lg text-sm">Batal Ubah</button></div>
+            <hr class="my-5 border-gray-100"><h4 class="font-semibold mb-3 text-sm">Daftar Semua Paket</h4><div id="listPaket"><p class="text-xs text-gray-400">Belum ada paket</p></div>
+        </div>
+        <div id="kDaftar" class="bg-white rounded-xl p-5 shadow-kartu hidden"><h3 class="font-semibold mb-3 text-sm">Data Pendaftar Jamaah</h3><div id="listDaftar"></div></div>
+        <div id="kGaleri" class="bg-white rounded-xl p-5 shadow-kartu hidden"><h3 class="font-semibold mb-3 text-sm">Kelola Galeri Foto</h3><input type="text" id="linkGal" placeholder="Masukkan Link Foto Baru" class="mb-3"><button onclick="tambahFotoGaleri()" class="tombol-emas text-gelap px-5 py-2.5 text-sm mb-4">➕ Tambah Foto</button><div id="listGaleri"></div></div>
+    </div>
+</div>
+
+<footer class="gradasi-utama text-white py-8 px-4 text-center text-sm">
+    <p class="text-yellow-200 font-bold font-judul text-xl">© 2026 ALLIA TOUR & TRAVEL</p>
+    <p class="text-white/75 mt-2">SK Kemenag: 21092201454530002 • Hubungi: 0813-3585-6500 • Umroh Sesuai Sunnah ❤️</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
