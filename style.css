@@ -1,0 +1,44 @@
+html { scroll-behavior: smooth; margin:0; padding:0; }
+body { font-family: 'Inter', sans-serif; background: #FFFFFF; color: #334155; margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden; }
+
+.gradasi-utama { background: linear-gradient(160deg, #052E3B 0%, #0F4C5C 50%, #165D71 100%); min-height: 100vh; margin:0; padding:0; }
+.tombol-emas { background: linear-gradient(90deg, #DAA520 0%, #B8860B 100%); transition: all 0.3s ease; border: none; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 14px rgba(218,165,32,0.3); }
+.tombol-emas:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(218,165,32,0.4); }
+.tombol-pesan { background: #0F4C5C; color: white; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }
+.tombol-pesan:hover { background: #0A3A47; transform: translateY(-2px); }
+
+.kartu-paket { background: #ffffff; border-radius: 14px; overflow: hidden; transition: all 0.4s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #F1F5F9; }
+.kartu-paket:hover { transform: translateY(-8px); box-shadow: 0 18px 45px rgba(15,76,92,0.18); border-color: rgba(218,165,32,0.35); }
+.label-kuota { background: #F0FDF4; color: #166534; border-radius: 99px; font-weight: 600; font-size: 12px; padding: 5px 12px; display: inline-block; }
+.angka-kuota { font-family: 'Playfair Display', serif; font-weight:700; font-size:20px; color:#0F4C5C; letter-spacing:0.5px; }
+.harga-paket { font-family: 'Playfair Display', serif; font-weight:700; font-size:24px; color:#B8860B; letter-spacing:0.3px; }
+
+.gambar-paket { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #0F4C5C, #165D71); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight:500; transition: transform 0.5s ease; }
+.kartu-paket:hover .gambar-paket { transform: scale(1.05); }
+
+.halaman { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.35s ease, transform 0.35s ease; min-height: 100vh; padding: 90px 16px 30px; margin:0 !important; }
+.halaman.aktif { display: block; opacity: 1; transform: translateY(0); }
+#beranda.halaman { padding-bottom:0 !important; min-height:100vh; }
+
+.bayang-teks { text-shadow: 0 3px 15px rgba(0,0,0,0.4); }
+.tombol-hapus { background: #FEF2F2; color: #B91C1C; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s ease; }
+.tombol-hapus:hover { background: #FEE2E2; transform: scale(1.05); }
+.item-baris { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px; background: #F8FAFC; border-radius: 10px; margin-bottom: 10px; border: 1px solid #E2E8F0; gap:10px; transition: 0.2s; }
+.item-baris:hover { background: #F0F9FF; }
+.id-data { font-size:11px; color:#94A3B8; font-family:monospace; background:#F1F5F9; padding:3px 6px; border-radius:4px; }
+.tab-pilihan, .tab-galeri { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.btn-tab, .btn-tab-g { padding: 9px 16px; border-radius: 8px; font-size:13px; font-weight:500; border:1px solid #E2E8F0; background: white; cursor: pointer; transition:0.2s; }
+.btn-tab.aktif, .btn-tab-g.aktif { background: #0F4C5C; color: white; border-color: #0F4C5C; }
+.btn-tab-g { background:transparent; border:none; border-bottom:2px solid transparent; border-radius:0; padding:8px 12px; }
+.btn-tab-g.aktif { background:transparent; color:#0F4C5C; font-weight:600; border-bottom-color:#DAA520; }
+input, select, textarea { outline: none; border: 1px solid #E2E8F0; transition: 0.2s; background: white; width: 100%; box-sizing: border-box; border-radius: 8px; padding: 12px 15px; font-size:14px; }
+input:focus, select:focus, textarea:focus { border-color: #0F4C5C; box-shadow: 0 0 0 4px rgba(15,76,92,0.08); }
+.kotak-unggul { background: white; border-radius: 14px; padding:22px; border:1px solid #F1F5F9; transition:0.3s ease; }
+.kotak-unggul:hover { border-color:rgba(218,165,32,0.35); transform:translateY(-5px); box-shadow:0 12px 35px rgba(15,76,92,0.1); }
+.boks-foto { border-radius:12px; overflow:hidden; background:white; box-shadow:0 2px 12px rgba(0,0,0,0.05); transition:0.3s ease; }
+.boks-foto:hover { transform:scale(1.04); box-shadow:0 10px 30px rgba(0,0,0,0.12); }
+img { max-width: 100%; display: block; }
+
+@keyframes naikTurun { 0%{transform:translateY(0px);} 50%{transform:translateY(-5px);} 100%{transform:translateY(0px);} }
+.animasi-naik { animation: naikTurun 3s ease-in-out infinite; }
+footer { margin-top:0 !important; }
